@@ -1,5 +1,6 @@
 {
   "name": "nutriai-tracker",
+  "homepage": "https://mschimidt.github.io/nutriai-tracker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
