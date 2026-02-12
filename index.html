@@ -1,69 +1,33 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>NutriAI Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NutriAI - Smart Health Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link rel="stylesheet" href="./index.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom scrollbar hiding for cleaner UI on mobile */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Smooth fade ins */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
+      body {
+        font-family: 'Inter', sans-serif;
+      }
     </style>
-    <script>
-      // Polyfill for process.env to prevent crashes in browser environment
-      window.process = {
-        env: {
-          API_KEY: "SUA_CHAVE_GEMINI_AQUI" // Se não for injetada automaticamente, coloque aqui para testar
-        }
-      };
-    </script>
   <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
-    "recharts": "https://esm.sh/recharts@^3.7.0",
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
-    "./App": "./App.tsx",
-    "./types": "./types.ts",
-    "./firebase": "./firebase.ts",
-    "./services/geminiService": "./services/geminiService.ts",
-    "./services/dbService": "./services/dbService.ts",
-    "./contexts/AuthContext": "./contexts/AuthContext.tsx",
-    "./components/Navigation": "./components/Navigation.tsx",
-    "./components/Dashboard": "./components/Dashboard.tsx",
-    "./components/FoodInput": "./components/FoodInput.tsx",
-    "./components/WorkoutInput": "./components/WorkoutInput.tsx",
-    "./components/Login": "./components/Login.tsx",
-    "./components/Button": "./components/Button.tsx",
     "firebase/": "https://esm.sh/firebase@^12.9.0/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-100">
+  <body class="bg-slate-50 text-slate-900 antialiased">
     <div id="root"></div>
-    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

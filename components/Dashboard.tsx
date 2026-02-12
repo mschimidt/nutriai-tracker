@@ -1,133 +1,56 @@
 import React from 'react';
-import { LogEntry, UserProfile } from '../types';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { AppView } from '../types';
 
 interface DashboardProps {
-  logs: LogEntry[];
-  userProfile: UserProfile;
+  setView: (view: AppView) => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ logs, userProfile }) => {
-  // Get today's logs
-  const today = new Date().setHours(0, 0, 0, 0);
-  const todaysLogs = logs.filter(log => new Date(log.timestamp).setHours(0, 0, 0, 0) === today);
-
-  const totalIntake = todaysLogs
-    .filter(l => l.type === 'food')
-    .reduce((acc, curr) => acc + (curr.type === 'food' ? curr.calories : 0), 0);
-
-  const totalBurned = todaysLogs
-    .filter(l => l.type === 'workout')
-    .reduce((acc, curr) => acc + (curr.type === 'workout' ? curr.caloriesBurned : 0), 0);
-  
-  // TMB is daily burn at rest
-  const tmb = userProfile.tmb || 0;
-  const netCalories = totalIntake - (totalBurned + tmb);
-  
-  const data = [
-    { name: 'Ingerido', value: totalIntake, color: '#10b981' }, // emerald-500
-    { name: 'Gasto (Treino)', value: totalBurned, color: '#f97316' }, // orange-500
-    { name: 'Gasto (Basal)', value: tmb, color: '#3b82f6' }, // blue-500
-  ];
-
+const Dashboard: React.FC<DashboardProps> = ({ setView }) => {
   return (
-    <div className="space-y-6 pb-20">
-      <header className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Seu Resumo Diário</h2>
-        <p className="text-gray-500 text-sm">Balanço calórico de hoje</p>
-      </header>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Ingestão</p>
-          <p className="text-2xl font-bold text-gray-900">{totalIntake} <span className="text-sm font-normal text-gray-400">kcal</span></p>
-        </div>
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Gasto Total</p>
-          <p className="text-2xl font-bold text-gray-900">{totalBurned + tmb} <span className="text-sm font-normal text-gray-400">kcal</span></p>
-        </div>
-      </div>
-
-      {/* Net Calculation */}
-      <div className="bg-gray-900 text-white p-6 rounded-3xl shadow-xl overflow-hidden relative">
-        <div className="relative z-10">
-            <p className="text-gray-400 text-sm font-medium mb-1">Balanço Líquido</p>
-            <div className="flex items-baseline gap-2">
-                <h3 className={`text-4xl font-bold ${netCalories > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                {netCalories > 0 ? '+' : ''}{netCalories}
-                </h3>
-                <span className="text-lg text-gray-500">kcal</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-                {netCalories > 0 ? "Você está em superávit calórico." : "Você está em déficit calórico."}
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-slate-800 mb-6">Welcome to NutriAI</h1>
+      
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Food Card */}
+        <div 
+          onClick={() => setView(AppView.FOOD_TRACKER)}
+          className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer border border-slate-100 group"
+        >
+          <div className="h-40 bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+            <svg className="w-20 h-20 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Track Calories</h2>
+            <p className="text-slate-600">
+              Upload a photo of your meal or describe what you ate. AI will estimate your caloric intake and macros.
             </p>
+            <span className="mt-4 inline-block text-orange-600 font-semibold group-hover:translate-x-1 transition-transform">Start Tracking &rarr;</span>
+          </div>
         </div>
-        {/* Background Decorative Circles */}
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-gray-800 rounded-full blur-xl opacity-50"></div>
-        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-gray-800 rounded-full blur-xl opacity-50"></div>
-      </div>
 
-      {/* Chart */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 h-64">
-         <h4 className="text-sm font-semibold text-gray-700 mb-4">Distribuição</h4>
-         <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: number) => [`${value} kcal`, '']} />
-            </PieChart>
-         </ResponsiveContainer>
-         <div className="flex justify-center gap-4 text-xs text-gray-500 mt-[-20px]">
-            {data.map(d => (
-                <div key={d.name} className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></span>
-                    {d.name}
-                </div>
-            ))}
-         </div>
-      </div>
-
-      {/* History List */}
-      <div>
-        <h3 className="text-lg font-bold text-gray-800 mb-3">Histórico de Hoje</h3>
-        <div className="space-y-3">
-          {todaysLogs.length === 0 ? (
-            <p className="text-gray-400 text-center py-4 text-sm">Nenhum registro hoje.</p>
-          ) : (
-            todaysLogs.slice().reverse().map((log) => (
-              <div key={log.id} className="flex items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 ${log.type === 'food' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`}>
-                  {log.type === 'food' ? '🥗' : '🔥'}
-                </div>
-                <div className="ml-3 flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{log.description}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className={`font-bold text-sm ${log.type === 'food' ? 'text-emerald-600' : 'text-orange-500'}`}>
-                    {log.type === 'food' ? '+' : '-'}{log.type === 'food' ? log.calories : log.caloriesBurned}
-                  </span>
-                  <span className="text-xs text-gray-400 block">kcal</span>
-                </div>
-              </div>
-            ))
-          )}
+        {/* Workout Card */}
+        <div 
+          onClick={() => setView(AppView.WORKOUT_TRACKER)}
+          className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer border border-slate-100 group"
+        >
+          <div className="h-40 bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+            <svg className="w-20 h-20 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Track Workouts</h2>
+            <p className="text-slate-600">
+              Send a photo of your treadmill, gym machine, or describe your workout. We'll calculate your burn based on your stats.
+            </p>
+            <span className="mt-4 inline-block text-blue-600 font-semibold group-hover:translate-x-1 transition-transform">Start Tracking &rarr;</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default Dashboard;

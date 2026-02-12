@@ -1,35 +1,36 @@
 export interface UserProfile {
+  uid: string;
+  email: string | null;
+}
+
+export interface UserStats {
   weight: number; // kg
   height: number; // cm
-  tmb: number; // Taxa Metabólica Basal
+  tmb: number; // Basal Metabolic Rate
 }
 
-export interface MacroNutrients {
-  protein: number;
-  carbs: number;
-  fat: number;
+export interface FoodAnalysisResult {
+  foodName: string;
+  estimatedCalories: number;
+  macros: {
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  confidence: string;
+  summary: string;
 }
 
-export interface FoodEntry {
-  id: string;
-  timestamp: number;
-  type: 'food';
-  description: string;
-  calories: number;
-  macros?: MacroNutrients;
-  imageUrl?: string;
-}
-
-export interface WorkoutEntry {
-  id: string;
-  timestamp: number;
-  type: 'workout';
-  description: string;
+export interface WorkoutAnalysisResult {
+  workoutType: string;
   caloriesBurned: number;
-  duration?: number; // minutes
-  imageUrl?: string;
+  intensity: string;
+  summary: string;
 }
 
-export type LogEntry = FoodEntry | WorkoutEntry;
-
-export type ViewState = 'dashboard' | 'food' | 'workout' | 'settings';
+export enum AppView {
+  LOGIN = 'LOGIN',
+  DASHBOARD = 'DASHBOARD',
+  FOOD_TRACKER = 'FOOD_TRACKER',
+  WORKOUT_TRACKER = 'WORKOUT_TRACKER',
+}

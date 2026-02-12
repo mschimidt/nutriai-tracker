@@ -1,151 +1,179 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { UserProfile } from "../types";
+import { FoodAnalysisResult, UserStats, WorkoutAnalysisResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Gemini Client
+// Requires 'process.env.API_KEY' which is polyfilled in vite.config.ts
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// --- Food Analysis ---
+const MODEL_NAME = 'gemini-3-flash-preview';
 
-export interface FoodAnalysisResult {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  description: string;
-}
-
-export const analyzeFood = async (
-  text: string,
-  imageBase64?: string
-): Promise<FoodAnalysisResult> => {
-  try {
-    const modelId = imageBase64 ? "gemini-2.5-flash-image" : "gemini-3-flash-preview";
-    
-    const parts: any[] = [];
-    
-    if (imageBase64) {
-      parts.push({
+/**
+ * Helper to convert a File object to a Base64 string suitable for Gemini
+ */
+export const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: string; mimeType: string } }> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      const base64Data = base64String.split(',')[1];
+      resolve({
         inlineData: {
-          mimeType: "image/jpeg",
-          data: imageBase64,
+          data: base64Data,
+          mimeType: file.type,
         },
       });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * Analyzes food intake from text description and/or image
+ */
+export const analyzeFoodIntake = async (
+  description: string,
+  imageFile: File | null
+): Promise<FoodAnalysisResult> => {
+  
+  const parts: any[] = [];
+  
+  if (imageFile) {
+    const imagePart = await fileToGenerativePart(imageFile);
+    parts.push(imagePart);
+  }
+  
+  if (description) {
+    parts.push({ text: `Description of food: ${description}` });
+  }
+
+  const prompt = `
+    Analyze the provided food image and/or description.
+    Identify the food items.
+    Estimate the total calories.
+    Provide a breakdown of macronutrients (Protein, Carbs, Fats).
+    Provide a short summary.
+    
+    Return the response in JSON format matching this schema:
+    {
+      "foodName": "string (Main dish name or summary)",
+      "estimatedCalories": number,
+      "macros": {
+        "protein": "string (e.g. 20g)",
+        "carbs": "string",
+        "fat": "string"
+      },
+      "confidence": "string (High/Medium/Low)",
+      "summary": "string (Short friendly summary)"
     }
+  `;
 
-    if (text) {
-      parts.push({ text: `Contexto adicional do usuário: ${text}` });
-    } else if (!text && imageBase64) {
-        parts.push({ text: "Analise esta imagem de comida." });
-    }
+  parts.push({ text: prompt });
 
-    const prompt = `
-      Identifique os alimentos, estime o tamanho das porções e calcule as calorias totais e macronutrientes.
-      Seja preciso e conservador nas estimativas.
-      Forneça uma curta descrição do que foi identificado em português.
-    `;
-
-    parts.push({ text: prompt });
-
+  try {
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: MODEL_NAME,
       contents: { parts },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            calories: { type: Type.NUMBER, description: "Total de calorias estimadas" },
-            protein: { type: Type.NUMBER, description: "Proteína em gramas" },
-            carbs: { type: Type.NUMBER, description: "Carboidratos em gramas" },
-            fat: { type: Type.NUMBER, description: "Gorduras em gramas" },
-            description: { type: Type.STRING, description: "Breve resumo do prato identificado (max 10 palavras)" },
-          },
-          required: ["calories", "protein", "carbs", "fat", "description"],
-        },
-      },
+            foodName: { type: Type.STRING },
+            estimatedCalories: { type: Type.NUMBER },
+            macros: {
+              type: Type.OBJECT,
+              properties: {
+                protein: { type: Type.STRING },
+                carbs: { type: Type.STRING },
+                fat: { type: Type.STRING },
+              }
+            },
+            confidence: { type: Type.STRING },
+            summary: { type: Type.STRING },
+          }
+        }
+      }
     });
 
     if (response.text) {
       return JSON.parse(response.text) as FoodAnalysisResult;
     }
-    throw new Error("Sem resposta da IA");
+    throw new Error("No data returned from AI");
   } catch (error) {
-    console.error("Food Analysis Error:", error);
+    console.error("Gemini Food Analysis Error:", error);
     throw error;
   }
 };
 
-// --- Workout Analysis ---
-
-export interface WorkoutAnalysisResult {
-  caloriesBurned: number;
-  analysis: string;
-  intensity: string;
-}
-
+/**
+ * Analyzes workout based on user stats, description, and/or image
+ */
 export const analyzeWorkout = async (
-  profile: UserProfile,
+  stats: UserStats,
   description: string,
-  imageBase64?: string
+  imageFile: File | null
 ): Promise<WorkoutAnalysisResult> => {
+
+  const parts: any[] = [];
+
+  if (imageFile) {
+    const imagePart = await fileToGenerativePart(imageFile);
+    parts.push(imagePart);
+  }
+
+  const userContext = `
+    User Statistics:
+    Weight: ${stats.weight}kg
+    Height: ${stats.height}cm
+    BMR (TMB): ${stats.tmb} kcal/day
+  `;
+  
+  parts.push({ text: userContext });
+  
+  if (description) {
+    parts.push({ text: `Workout Description: ${description}` });
+  }
+
+  const prompt = `
+    Analyze the provided workout description or image (which might be a gym machine screen, a workout summary board, or a selfie) in context of the User Statistics.
+    Estimate the total calories burned during this specific session.
+    
+    Return the response in JSON format matching this schema:
+    {
+      "workoutType": "string",
+      "caloriesBurned": number,
+      "intensity": "string (Low/Moderate/High)",
+      "summary": "string (Short analysis of the effort)"
+    }
+  `;
+
+  parts.push({ text: prompt });
+
   try {
-    const modelId = imageBase64 ? "gemini-2.5-flash-image" : "gemini-3-flash-preview";
-    const parts: any[] = [];
-
-    if (imageBase64) {
-      parts.push({
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: imageBase64,
-        },
-      });
-    }
-
-    let textPrompt = `
-      Usuário:
-      Peso: ${profile.weight} kg
-      Altura: ${profile.height} cm
-      TMB (Basal): ${profile.tmb} kcal/dia
-    `;
-
-    if (description) {
-        textPrompt += `\nDescrição do treino: "${description}"`;
-    }
-
-    if (imageBase64) {
-        textPrompt += `\nAnalise a imagem fornecida (pode ser equipamentos, painel de esteira/relógio ou o ambiente).`;
-    }
-
-    textPrompt += `\n
-      Com base nos dados biométricos, na descrição e na imagem (se houver), estime as calorias gastas (acima do repouso).
-      Classifique a intensidade.
-      Se a imagem mostrar um valor de calorias explícito (ex: painel de esteira), use-o como referência principal, mas valide se faz sentido.
-    `;
-
-    parts.push({ text: textPrompt });
-
     const response = await ai.models.generateContent({
-      model: modelId,
+      model: MODEL_NAME,
       contents: { parts },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            caloriesBurned: { type: Type.NUMBER, description: "Calorias gastas estimadas pelo exercício" },
-            analysis: { type: Type.STRING, description: "Breve explicação do cálculo ou confirmação do exercício" },
-            intensity: { type: Type.STRING, description: "Baixa, Média, Alta ou Muito Alta" },
-          },
-          required: ["caloriesBurned", "analysis", "intensity"],
-        },
-      },
+            workoutType: { type: Type.STRING },
+            caloriesBurned: { type: Type.NUMBER },
+            intensity: { type: Type.STRING },
+            summary: { type: Type.STRING },
+          }
+        }
+      }
     });
 
     if (response.text) {
       return JSON.parse(response.text) as WorkoutAnalysisResult;
     }
-    throw new Error("Sem resposta da IA");
+    throw new Error("No data returned from AI");
   } catch (error) {
-    console.error("Workout Analysis Error:", error);
+    console.error("Gemini Workout Analysis Error:", error);
     throw error;
   }
 };

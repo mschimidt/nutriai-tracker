@@ -1,6 +1,6 @@
 {
-  "name": "NutriAI Tracker",
-  "description": "Um assistente inteligente de calorias e treinos alimentado por IA. Rastreie sua ingestão via fotos e calcule gastos de exercícios com base no seu perfil.",
+  "name": "NutriAI",
+  "description": "Smart calorie and workout tracking powered by Gemini AI. Track your nutrition and exercise with photos and text.",
   "requestFramePermissions": [
     "camera"
   ]
