@@ -1,0 +1,7 @@
+{
+  "name": "NutriAI Tracker",
+  "description": "Um assistente inteligente de calorias e treinos alimentado por IA. Rastreie sua ingestão via fotos e calcule gastos de exercícios com base no seu perfil.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
