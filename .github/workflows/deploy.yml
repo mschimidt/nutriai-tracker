@@ -37,11 +37,3 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
-
-Dados do Firebase com projeto ja criado:
-API_KEY=AIzaSyBZ8-0NrU8C3cXnU9d1Dc2qBctv8xMrpo4
-AUTH_DOMAIN=nutriai-9f4c8.firebaseapp.com
-PROJECT_ID=nutriai-9f4c8
-STORAGE_BUCKET=nutriai-9f4c8.firebasestorage.app
-MESSAGING_SENDER_ID=245765105329
-APP_ID=1:245765105329:web:c7daacb35f7b040b442490
