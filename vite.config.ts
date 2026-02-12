@@ -6,8 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react()],
-    base: "/nutriai-tracker/",
-    // base: './', // Ensures relative paths for GitHub Pages
+    base: './', // Ensures relative paths for GitHub Pages
     define: {
       // Maps VITE_GEMINI_API_KEY from GitHub Secrets to process.env.API_KEY for the SDK
       'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
