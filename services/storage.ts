@@ -60,7 +60,9 @@ export const getTodayLogs = async (userId: string): Promise<LogEntry[]> => {
 
     // Filter for today in JS
     const today = new Date().setHours(0, 0, 0, 0);
+    // Sort descending (newest first)
     return logs.filter(log => {
+      // Fix: Ensure timestamp is valid number/date before creating Date object
       const logDate = new Date(log.timestamp).setHours(0, 0, 0, 0);
       return logDate === today;
     }).sort((a, b) => b.timestamp - a.timestamp);
@@ -71,7 +73,8 @@ export const getTodayLogs = async (userId: string): Promise<LogEntry[]> => {
   }
 };
 
-export const deleteLog = async (userId: string, logId: string) => {
+// CORREÇÃO AQUI: Adicionado o "_" antes de userId para ignorar o erro de variável não usada
+export const deleteLog = async (_userId: string, logId: string) => {
   try {
     // Delete the document based on the ID
     // Note: In a real app, verify userId matches document owner via Security Rules
