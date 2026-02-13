@@ -10,50 +10,66 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ setView, userId }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stats, setStats] = useState({ eaten: 0, burned: 0, bmr: 0, balance: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const loadData = () => {
-    const todayLogs = getTodayLogs(userId);
-    const userStats = getUserStats(userId);
-    
-    const eaten = todayLogs
-      .filter(l => l.type === 'FOOD')
-      .reduce((acc, curr) => acc + curr.calories, 0);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Fetch both in parallel for speed
+      const [todayLogs, userStats] = await Promise.all([
+        getTodayLogs(userId),
+        getUserStats(userId)
+      ]);
       
-    const burned = todayLogs
-      .filter(l => l.type === 'WORKOUT')
-      .reduce((acc, curr) => acc + curr.calories, 0);
+      const eaten = todayLogs
+        .filter(l => l.type === 'FOOD')
+        .reduce((acc, curr) => acc + curr.calories, 0);
+        
+      const burned = todayLogs
+        .filter(l => l.type === 'WORKOUT')
+        .reduce((acc, curr) => acc + curr.calories, 0);
 
-    // Balance = Eaten - (BMR + Exercise)
-    // We assume BMR is for the whole day, so we subtract it fully.
-    const balance = eaten - (userStats.tmb + burned);
+      // Balance = Eaten - (BMR + Exercise)
+      const balance = eaten - (userStats.tmb + burned);
 
-    setLogs(todayLogs);
-    setStats({
-      eaten,
-      burned,
-      bmr: userStats.tmb,
-      balance
-    });
+      setLogs(todayLogs);
+      setStats({
+        eaten,
+        burned,
+        bmr: userStats.tmb,
+        balance
+      });
+    } catch (error) {
+      console.error("Failed to load dashboard data", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, [userId]);
 
-  const handleDelete = (logId: string) => {
+  const handleDelete = async (logId: string) => {
     if (confirm('Tem certeza que deseja excluir este registro?')) {
-      deleteLog(userId, logId);
+      await deleteLog(userId, logId);
       loadData();
     }
   };
 
   const getBalanceColor = (balance: number) => {
-    // If balance is negative, it means deficit (Good for weight loss usually)
-    // If balance is highly positive, surplus (Gaining weight)
-    if (balance < -500) return 'text-blue-600'; // Big deficit
-    if (balance > 500) return 'text-red-600';   // Big surplus
-    return 'text-emerald-600'; // Maintenance zone
+    if (balance < -500) return 'text-blue-600'; 
+    if (balance > 500) return 'text-red-600';   
+    return 'text-emerald-600'; 
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

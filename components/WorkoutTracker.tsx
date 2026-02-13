@@ -25,18 +25,25 @@ const WorkoutTracker: React.FC<WorkoutTrackerProps> = ({ userId, setView }) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load stats from local storage on mount
+  // Load stats from Firestore
   useEffect(() => {
-    const savedStats = getUserStats(userId);
-    setStats(savedStats);
-    setIsStatsExpanded(false);
+    const loadStats = async () => {
+      const savedStats = await getUserStats(userId);
+      setStats(savedStats);
+      // Collapse if stats look modified from default (e.g. user has set them previously)
+      if (savedStats.weight !== 70 || savedStats.tmb !== 1600) {
+        setIsStatsExpanded(false);
+      }
+    };
+    loadStats();
   }, [userId]);
 
   const handleStatChange = (key: keyof UserStats, value: string) => {
     const numVal = parseFloat(value) || 0;
     const newStats = { ...stats, [key]: numVal };
     setStats(newStats);
-    saveUserStats(userId, newStats);
+    // Fire and forget save for better UX while typing, or could debounce
+    saveUserStats(userId, newStats).catch(console.error);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,19 +77,25 @@ const WorkoutTracker: React.FC<WorkoutTrackerProps> = ({ userId, setView }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!result) return;
     
-    saveLog(userId, {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      type: 'WORKOUT',
-      title: result.workoutType,
-      calories: result.caloriesBurned,
-      details: result.summary
-    });
+    setLoading(true);
+    try {
+      await saveLog(userId, {
+        timestamp: Date.now(),
+        type: 'WORKOUT',
+        title: result.workoutType,
+        calories: result.caloriesBurned,
+        details: result.summary
+      });
 
-    setView(AppView.DASHBOARD);
+      setView(AppView.DASHBOARD);
+    } catch (e) {
+      console.error(e);
+      setError("Erro ao salvar no banco de dados.");
+      setLoading(false);
+    }
   };
 
   const reset = () => {
@@ -225,7 +238,7 @@ const WorkoutTracker: React.FC<WorkoutTrackerProps> = ({ userId, setView }) => {
                   onClick={handleSave}
                   className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors"
                 >
-                  Salvar no Histórico
+                   {loading ? 'Salvando...' : 'Salvar no Histórico'}
                 </button>
              </div>
           </div>

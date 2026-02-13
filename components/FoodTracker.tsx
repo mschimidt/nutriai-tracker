@@ -49,19 +49,25 @@ const FoodTracker: React.FC<FoodTrackerProps> = ({ userId, setView }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!result) return;
     
-    saveLog(userId, {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      type: 'FOOD',
-      title: result.foodName,
-      calories: result.estimatedCalories,
-      details: result.summary
-    });
+    setLoading(true);
+    try {
+      await saveLog(userId, {
+        timestamp: Date.now(),
+        type: 'FOOD',
+        title: result.foodName,
+        calories: result.estimatedCalories,
+        details: result.summary
+      });
 
-    setView(AppView.DASHBOARD);
+      setView(AppView.DASHBOARD);
+    } catch (e) {
+      console.error(e);
+      setError("Erro ao salvar no banco de dados.");
+      setLoading(false);
+    }
   };
 
   const reset = () => {
@@ -186,7 +192,7 @@ const FoodTracker: React.FC<FoodTrackerProps> = ({ userId, setView }) => {
                   onClick={handleSave}
                   className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors"
                 >
-                  Salvar no Histórico
+                  {loading ? 'Salvando...' : 'Salvar no Histórico'}
                 </button>
              </div>
           </div>

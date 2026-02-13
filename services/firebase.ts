@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 // Vite uses import.meta.env for environment variables
 // Casting import.meta to any to resolve TS error: Property 'env' does not exist on type 'ImportMeta'
@@ -16,3 +17,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
