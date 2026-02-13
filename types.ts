@@ -6,7 +6,7 @@ export interface UserProfile {
 export interface UserStats {
   weight: number; // kg
   height: number; // cm
-  tmb: number; // Basal Metabolic Rate
+  tmb: number; // Taxa Metabólica Basal
 }
 
 export interface FoodAnalysisResult {
@@ -26,6 +26,15 @@ export interface WorkoutAnalysisResult {
   caloriesBurned: number;
   intensity: string;
   summary: string;
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: number;
+  type: 'FOOD' | 'WORKOUT';
+  title: string;
+  calories: number; // Positive for food, negative (conceptually) for workout
+  details: string; // Summary
 }
 
 export enum AppView {

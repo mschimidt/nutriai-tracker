@@ -30,13 +30,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, userEmail }) => {
                 onClick={() => setView(AppView.FOOD_TRACKER)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentView === AppView.FOOD_TRACKER ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-emerald-500'}`}
               >
-                Food
+                Alimentação
               </button>
               <button 
                 onClick={() => setView(AppView.WORKOUT_TRACKER)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentView === AppView.WORKOUT_TRACKER ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-emerald-500'}`}
               >
-                Workout
+                Treino
               </button>
             </div>
           </div>
@@ -47,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, userEmail }) => {
                onClick={handleSignOut}
                className="bg-emerald-800 hover:bg-emerald-900 text-white px-3 py-1 rounded text-sm transition-colors"
              >
-               Logout
+               Sair
              </button>
           </div>
         </div>

@@ -19,9 +19,9 @@ const Login: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/invalid-credential') {
-        setError('Invalid email or password.');
+        setError('E-mail ou senha inválidos.');
       } else {
-        setError('Failed to login. Please try again.');
+        setError('Falha ao entrar. Tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -38,7 +38,7 @@ const Login: React.FC = () => {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-slate-800">NutriAI</h1>
-          <p className="text-slate-500 mt-2">Sign in to track your health</p>
+          <p className="text-slate-500 mt-2">Entre para monitorar sua saúde</p>
         </div>
 
         {error && (
@@ -49,19 +49,19 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-              placeholder="you@example.com"
+              placeholder="voce@exemplo.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
             <input
               type="password"
               value={password}
@@ -77,12 +77,12 @@ const Login: React.FC = () => {
             disabled={loading}
             className={`w-full py-3 px-4 rounded-xl font-bold text-white shadow-md transition-all ${loading ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg active:scale-[0.98]'}`}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
         
         <div className="mt-6 text-center text-xs text-slate-400">
-           Note: New accounts must be created by the administrator.
+           Nota: Novos contatos devem ser criados pelo administrador.
         </div>
       </div>
     </div>

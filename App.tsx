@@ -48,9 +48,9 @@ const App: React.FC = () => {
       />
       
       <main className="flex-grow">
-        {currentView === AppView.DASHBOARD && <Dashboard setView={setCurrentView} />}
-        {currentView === AppView.FOOD_TRACKER && <FoodTracker />}
-        {currentView === AppView.WORKOUT_TRACKER && <WorkoutTracker />}
+        {currentView === AppView.DASHBOARD && <Dashboard setView={setCurrentView} userId={user.uid} />}
+        {currentView === AppView.FOOD_TRACKER && <FoodTracker userId={user.uid} setView={setCurrentView} />}
+        {currentView === AppView.WORKOUT_TRACKER && <WorkoutTracker userId={user.uid} setView={setCurrentView} />}
       </main>
 
       <footer className="bg-white border-t border-slate-200 py-6 mt-12">

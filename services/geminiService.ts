@@ -44,27 +44,27 @@ export const analyzeFoodIntake = async (
   }
   
   if (description) {
-    parts.push({ text: `Description of food: ${description}` });
+    parts.push({ text: `Descrição da comida: ${description}` });
   }
 
   const prompt = `
-    Analyze the provided food image and/or description.
-    Identify the food items.
-    Estimate the total calories.
-    Provide a breakdown of macronutrients (Protein, Carbs, Fats).
-    Provide a short summary.
+    Analise a imagem da comida fornecida e/ou a descrição.
+    Identifique os itens alimentares.
+    Estime o total de calorias.
+    Forneça uma divisão de macronutrientes (Proteína, Carboidratos, Gorduras).
+    Forneça um breve resumo em PORTUGUÊS (PT-BR).
     
-    Return the response in JSON format matching this schema:
+    Retorne a resposta em formato JSON correspondente a este esquema:
     {
-      "foodName": "string (Main dish name or summary)",
+      "foodName": "string (Nome do prato principal ou resumo em PT-BR)",
       "estimatedCalories": number,
       "macros": {
-        "protein": "string (e.g. 20g)",
+        "protein": "string (ex: 20g)",
         "carbs": "string",
         "fat": "string"
       },
-      "confidence": "string (High/Medium/Low)",
-      "summary": "string (Short friendly summary)"
+      "confidence": "string (Alta/Média/Baixa)",
+      "summary": "string (Resumo amigável em Português PT-BR)"
     }
   `;
 
@@ -99,7 +99,7 @@ export const analyzeFoodIntake = async (
     if (response.text) {
       return JSON.parse(response.text) as FoodAnalysisResult;
     }
-    throw new Error("No data returned from AI");
+    throw new Error("Nenhum dado retornado pela IA");
   } catch (error) {
     console.error("Gemini Food Analysis Error:", error);
     throw error;
@@ -123,28 +123,29 @@ export const analyzeWorkout = async (
   }
 
   const userContext = `
-    User Statistics:
-    Weight: ${stats.weight}kg
-    Height: ${stats.height}cm
-    BMR (TMB): ${stats.tmb} kcal/day
+    Estatísticas do Usuário:
+    Peso: ${stats.weight}kg
+    Altura: ${stats.height}cm
+    TMB (Taxa Metabólica Basal): ${stats.tmb} kcal/dia
   `;
   
   parts.push({ text: userContext });
   
   if (description) {
-    parts.push({ text: `Workout Description: ${description}` });
+    parts.push({ text: `Descrição do treino: ${description}` });
   }
 
   const prompt = `
-    Analyze the provided workout description or image (which might be a gym machine screen, a workout summary board, or a selfie) in context of the User Statistics.
-    Estimate the total calories burned during this specific session.
+    Analise a descrição do treino fornecida ou a imagem (que pode ser a tela de uma máquina de academia, um quadro de resumo de treino ou uma selfie) no contexto das Estatísticas do Usuário.
+    Estime o total de calorias queimadas durante esta sessão específica.
+    Responda em PORTUGUÊS (PT-BR).
     
-    Return the response in JSON format matching this schema:
+    Retorne a resposta em formato JSON correspondente a este esquema:
     {
-      "workoutType": "string",
+      "workoutType": "string (Tipo de treino em PT-BR)",
       "caloriesBurned": number,
-      "intensity": "string (Low/Moderate/High)",
-      "summary": "string (Short analysis of the effort)"
+      "intensity": "string (Baixa/Moderada/Alta)",
+      "summary": "string (Breve análise do esforço em Português PT-BR)"
     }
   `;
 
@@ -171,7 +172,7 @@ export const analyzeWorkout = async (
     if (response.text) {
       return JSON.parse(response.text) as WorkoutAnalysisResult;
     }
-    throw new Error("No data returned from AI");
+    throw new Error("Nenhum dado retornado pela IA");
   } catch (error) {
     console.error("Gemini Workout Analysis Error:", error);
     throw error;
